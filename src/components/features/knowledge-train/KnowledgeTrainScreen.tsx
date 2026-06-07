@@ -105,9 +105,14 @@ export default function KnowledgeTrainScreen({ onNavigate }: NavigationProps) {
   const [activeTrainTab, setActiveTrainTab] = useState<'knowledge' | 'rules'>('knowledge');
   const [extractedRules, setExtractedRules] = useState<string[]>([]);
   const [isExtractingRules, setIsExtractingRules] = useState(false);
-  const [aiModelForRules, setAiModelForRules] = useState<string>('gemini-3.5-flash');
+  const [aiModelForRules, setAiModelForRules] = useState<string>('gemini-3.1-pro-preview');
   const [rulesCount, setRulesCount] = useState<number>(100);
   const [wordsPerRule, setWordsPerRule] = useState<number>(100);
+
+  // States for Batch Entity / Encyclopedia Extraction
+  const [isExtractingEntities, setIsExtractingEntities] = useState(false);
+  const [aiModelForEntities, setAiModelForEntities] = useState<string>('gemini-3.1-pro-preview');
+  const [extractedEntities, setExtractedEntities] = useState<any[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);

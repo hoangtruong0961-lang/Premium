@@ -301,7 +301,7 @@ export const getAiClient = (settings?: AppSettings, forceDirect: boolean = false
           rawMessages.forEach((msg: any) => messages.push(msg));
 
           const body: any = {
-            model: model || activeProxy?.model || settings?.aiModel || "gemini-3.5-flash",
+            model: model || activeProxy?.model || settings?.aiModel || "gemini-3.1-pro-preview",
             messages: messages,
             temperature: config?.temperature ?? settings?.temperature ?? 1.0,
             max_tokens: config?.maxOutputTokens || 4096,
@@ -466,7 +466,7 @@ export const getAiClient = (settings?: AppSettings, forceDirect: boolean = false
           rawMessages.forEach((msg: any) => messages.push(msg));
 
           const body: any = {
-            model: model || activeProxy?.model || settings?.aiModel || "gemini-3.5-flash",
+            model: model || activeProxy?.model || settings?.aiModel || "gemini-3.1-pro-preview",
             messages: messages,
             temperature: config?.temperature ?? settings?.temperature ?? 0.7,
             max_tokens: config?.maxOutputTokens || 4096,

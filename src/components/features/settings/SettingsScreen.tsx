@@ -857,8 +857,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate, fromGame, i
   if (!settings) return <div className="flex items-center justify-center h-full text-slate-400">Đang tải cấu hình...</div>;
 
   const defaultModels = [
-    "gemini-3.5-flash",
     "gemini-3.1-pro-preview",
+    "gemini-3.5-flash",
     "gemini-3-flash-preview",
     "gemini-2.5-pro-preview",
     "gemini-2.5-flash-preview"

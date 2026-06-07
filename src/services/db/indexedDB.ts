@@ -90,7 +90,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     visualEffects: true,
     fullScreenMode: false,
     safetySettings: DEFAULT_SAFETY_SETTINGS,
-    aiModel: 'gemini-3.5-flash',
+    aiModel: 'gemini-3.1-pro-preview',
     backgroundAiModel: 'gemini-3-flash-preview',
     aiMode: 'single',
     embeddingModel: 'gemini-embedding-001',
@@ -385,6 +385,12 @@ class DatabaseService {
           mergedSettings._uiMigrated3 = true;
           setTimeout(() => this.saveSettings(mergedSettings), 0);
         }
+      }
+
+      // MIGRATION: Default to gemini-3.1-pro-preview for main AI model if settings has gemini-3.5-flash as the old default
+      if (mergedSettings.aiModel === 'gemini-3.5-flash' || !mergedSettings.aiModel) {
+        mergedSettings.aiModel = 'gemini-3.1-pro-preview';
+        setTimeout(() => this.saveSettings(mergedSettings), 0);
       }
 
       // MIGRATION: Move old proxy settings to the new proxies array if empty

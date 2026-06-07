@@ -250,7 +250,7 @@ export const Mem0Service = {
 
       const modelName = settings.aiMode === "hybrid" && settings.backgroundAiModel 
         ? settings.backgroundAiModel 
-        : (settings.aiModel || "gemini-3.5-flash");
+        : (settings.aiModel || "gemini-3.1-pro-preview");
 
       const prompt = `Bạn là ARK Mem0 Engine - Bộ lọc và lưu lại bộ nhớ cá nhân hóa sâu sắc của thế giới game RPG dã sử trinh thám.
 

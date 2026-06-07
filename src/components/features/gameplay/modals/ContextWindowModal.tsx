@@ -1230,7 +1230,7 @@ const ContextWindowModal: React.FC<ContextWindowModalProps> = ({
 
             const aiClient = getAiClient(settings);
             const response = await aiClient.models.generateContent({
-                model: settings?.aiModel || "gemini-3.5-flash",
+                model: settings?.aiModel || "gemini-3.1-pro-preview",
                 contents: [
                     { role: 'user', parts: [{ text: simulatorInput }] }
                 ],

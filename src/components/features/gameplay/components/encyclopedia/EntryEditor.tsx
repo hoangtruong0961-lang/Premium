@@ -72,7 +72,7 @@ export const EntryEditor: React.FC<EntryEditorProps> = ({
   const [wizardStep, setWizardStep] = useState(1);
 
   const { settings } = useAppStore();
-  const currentModel = settings?.aiModel || "gemini-3.5-flash";
+  const currentModel = settings?.aiModel || "gemini-3.1-pro-preview";
 
   // Keyboard Shortcuts Listener for editor
   useEffect(() => {

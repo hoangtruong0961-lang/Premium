@@ -298,7 +298,7 @@ Hãy trả về một JSON object duy nhất với định dạng chính xác sa
         const aiClient = getAiClient(settings);
         try {
             const response = await aiClient.models.generateContent({
-                model: settings.aiModel || "gemini-3.5-flash",
+                model: settings.aiModel || "gemini-3.1-pro-preview",
                 contents: [{ role: "user", parts: [{ text: prompt }] }],
                 config: {
                     temperature: 0.1,
