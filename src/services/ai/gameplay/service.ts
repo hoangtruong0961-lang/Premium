@@ -1151,6 +1151,17 @@ ${tableDefinitionsStr}
      - Delta = 10+ turns: Prepared food might become stiff or spoiled.
    - Constantly regulate temperatures, decay states, gashes, charges, and durability states of equipped items, debuffs (Table #12), and active items to enforce pristine physical laws.
 
+4. **TIMELINE REAL-TIME CLOCK RULE (Table #15 "Timeline Nhân Vật Chính")**:
+   - For Column 1 of Table #15 ("Thời điểm (Ngày/Tháng/Năm)"), you MUST write the actual in-game date/time (e.g., "Ngày 15, Tháng 2, Năm 3025", "12:00, Ngày mồng 3", "20/12/3025") as described in the story narrative or game time.
+   - **STRICT PROHIBITION ON SYSTEM STRINGS**: You are STRICTLY FORBIDDEN from writing internal engine markers, turn numbers, or system words (such as "Turn 4", "Turn 15", "Turn X", "Reload") into this column. It MUST represent real in-game calendar time only.
+   - Do not aggregate, accumulate, or include any of the user's out-of-character actions or reload turns.
+
+5. **CURRENT INFORMATION CONSISTENCY (Table #0 "Thông tin Hiện tại")**:
+   - Columns: ["Thời gian", "Địa điểm", "Sự kiện", "Mục tiêu"]
+   - Since "Thời gian" (Time) is Column 0, you MUST use the current calendar/game time (e.g., "Ngày 15, Giờ Mùi" or "12:00, Ngày mồng 3", "20/12/3025") as the "rowKey" (Column 0).
+   - Since "Địa điểm" (Location) is Column 1, you MUST write the current location name (e.g. "Hang đá", "Sơn cốc") in the first value of columnValues (Column 1).
+   - Never write raw turn numbers or turn counts into the "rowKey" (Time) column—it must represent real in-game story time.
+
 Rules for updates:
 - action: "add" if a record does not exist in the table.
 - action: "update" if updating an existing record (matching on rowKey = column index 0).

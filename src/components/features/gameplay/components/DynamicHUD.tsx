@@ -117,7 +117,7 @@ export const DynamicHUD: React.FC<DynamicHUDProps> = ({ worldData, gameTime, tur
     // --- Parse LSR Tables ---
     // #0 Thông tin Hiện tại: ["Thời gian", "Địa điểm", "Sự kiện", "Mục tiêu"]
     const t0 = (lsr['0'] || []) as any[];
-    const currentInfo = t0[0] || null;
+    const currentInfo = t0[t0.length - 1] || null;
     const locationString = getRowValue(currentInfo, 1, 'Chưa xác định');
     const currentEvent = getRowValue(currentInfo, 2, '');
     const currentObjective = getRowValue(currentInfo, 3, '');

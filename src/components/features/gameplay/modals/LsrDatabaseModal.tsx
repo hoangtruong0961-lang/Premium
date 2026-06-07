@@ -538,12 +538,17 @@ const LsrDatabaseModal: React.FC<LsrDatabaseModalProps> = ({
                                                         </div>
                                                     ) : (
                                                         currentRows.map((row: any, rIdx: number) => {
-                                                            const timeVal = row["0"] || "Unknown Time";
+                                                            let timeVal = row["0"] || "Unknown Time";
                                                             let secBadgeVal = "";
                                                             let titleVal = "";
                                                             let descVal = "";
                                                             
-                                                            if (activeTable.columns.length >= 4) {
+                                                            if (activeTable.id === "15") {
+                                                                timeVal = row["1"] || "Giờ/Ngày/Tháng/Năm";
+                                                                secBadgeVal = row["0"] ? `${activeTable.columns[0]}: ${row["0"]}` : "";
+                                                                titleVal = row["2"] || "";
+                                                                descVal = row["3"] || "";
+                                                            } else if (activeTable.columns.length >= 4) {
                                                                 secBadgeVal = row["1"] || "";
                                                                 titleVal = row["2"] || "";
                                                                 descVal = row["3"] || "";
