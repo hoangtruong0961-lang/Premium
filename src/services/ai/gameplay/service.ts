@@ -1531,9 +1531,19 @@ Be extremely accurate. ONLY output updates when there is a true change/consequen
         .toLowerCase();
 
       const sortedEntities = [...worldData.entities].sort((a, b) => {
-        // Calculate mention frequency in recent text
-        const countA = (recentText.match(new RegExp(a.name.toLowerCase(), "g")) || []).length;
-        const countB = (recentText.match(new RegExp(b.name.toLowerCase(), "g")) || []).length;
+        // Calculate mention frequency in recent text with safe escaping and error isolation
+        let countA = 0;
+        let countB = 0;
+        try {
+          const escapedA = a.name.toLowerCase().replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+          const escapedB = b.name.toLowerCase().replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+          countA = (recentText.match(new RegExp(escapedA, "g")) || []).length;
+          countB = (recentText.match(new RegExp(escapedB, "g")) || []).length;
+        } catch (_) {
+          // Fallback to simpler substring search if regex fails
+          countA = recentText.split(a.name.toLowerCase()).length - 1;
+          countB = recentText.split(b.name.toLowerCase()).length - 1;
+        }
 
         // Priority 1: Mention count in recent context
         if (countA !== countB) return countB - countA;
