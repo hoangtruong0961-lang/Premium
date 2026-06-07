@@ -154,16 +154,32 @@ async function startServer() {
                          headers['accept']?.includes('event-stream')
                        ));
 
+      // Sanitize forwarded headers to prevent mismatched size or encoding errors (like 400: failed to read request body)
+      const cleanHeaders: Record<string, string> = {};
+      if (headers && typeof headers === 'object') {
+        Object.entries(headers).forEach(([key, value]) => {
+          const lowerKey = key.toLowerCase();
+          if (
+            lowerKey !== 'host' &&
+            lowerKey !== 'referer' &&
+            lowerKey !== 'origin' &&
+            lowerKey !== 'content-length' &&
+            lowerKey !== 'transfer-encoding' &&
+            lowerKey !== 'connection' &&
+            lowerKey !== 'content-encoding' &&
+            lowerKey !== 'accept-encoding' &&
+            value !== undefined &&
+            value !== null
+          ) {
+            cleanHeaders[key] = String(value);
+          }
+        });
+      }
+
       const response = await axios({
         url,
         method: method || 'POST',
-        headers: {
-          ...headers,
-          // Remove host header to avoid issues with some proxies
-          'host': undefined,
-          'referer': undefined,
-          'origin': undefined
-        },
+        headers: cleanHeaders,
         data: body,
         responseType: isStream ? 'stream' : 'json',
         validateStatus: () => true // Don't throw on error status codes
