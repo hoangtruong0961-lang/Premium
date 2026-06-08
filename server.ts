@@ -206,9 +206,22 @@ async function startServer() {
         validateStatus: () => true // Don't throw on error status codes
       });
 
-      // Forward headers from the target response
+      // Forward headers from the target response selectively (avoiding duplicate CORS/decompression/iframe policy conflicts)
       Object.entries(response.headers).forEach(([key, value]) => {
-        if (value) res.setHeader(key, value);
+        const lowerKey = key.toLowerCase();
+        if (
+          lowerKey !== 'content-encoding' &&
+          lowerKey !== 'content-length' &&
+          lowerKey !== 'transfer-encoding' &&
+          lowerKey !== 'connection' &&
+          lowerKey !== 'keep-alive' &&
+          !lowerKey.startsWith('access-control-') &&
+          lowerKey !== 'content-security-policy' &&
+          lowerKey !== 'x-frame-options' &&
+          value
+        ) {
+          res.setHeader(key, value);
+        }
       });
 
       res.status(response.status);
