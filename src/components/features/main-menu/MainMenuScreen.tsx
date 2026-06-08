@@ -163,7 +163,7 @@ const MainMenuScreen: React.FC<NavigationProps> = ({ onNavigate, onGameStart }) 
     }
     
     // Check if environment API key is available
-    const safeEnv = typeof process !== "undefined" ? process.env : {};
+    const safeEnv = (typeof process !== "undefined" && process?.env) ? process.env : {};
     const hasEnvKey = !!(safeEnv?.API_KEY || safeEnv?.GEMINI_API_KEY);
     if (hasEnvKey) {
       setTimeout(() => {

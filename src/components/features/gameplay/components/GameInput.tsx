@@ -80,9 +80,14 @@ const GameInput = forwardRef<GameInputRef, GameInputProps>(({
     }), [handleSendInternal]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault();
-            handleSendInternal();
+        if (e.key === 'Enter') {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                handleSendInternal();
+            } else {
+                // Ensure regular Enter or Shift+Enter inserts a newline and doesn't bubble up to send triggers
+                e.stopPropagation();
+            }
         } else if (e.key === 'ArrowUp') {
             const target = e.target as HTMLTextAreaElement;
             if (target.selectionStart === 0) {

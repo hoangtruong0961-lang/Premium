@@ -1,6 +1,11 @@
 import { Buffer } from 'buffer';
 if (typeof window !== 'undefined') {
   (window as any).Buffer = Buffer;
+  if (!(window as any).process) {
+    (window as any).process = { env: {} };
+  } else if (!(window as any).process.env) {
+    (window as any).process.env = {};
+  }
 }
 
 import React from 'react';
