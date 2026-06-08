@@ -80,7 +80,7 @@ const GameInput = forwardRef<GameInputRef, GameInputProps>(({
     }), [handleSendInternal]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             handleSendInternal();
         } else if (e.key === 'ArrowUp') {
