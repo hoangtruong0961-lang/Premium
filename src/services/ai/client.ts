@@ -637,18 +637,36 @@ export const getAiClient = (settings?: AppSettings, forceDirect: boolean = false
 
         // Helper to convert Headers (including Headers instance) to a plain object
         const headersObj: Record<string, string> = {};
+        const isHeaderKeysToExclude = (key: string): boolean => {
+          const lowerKey = key.toLowerCase();
+          return (
+            lowerKey === 'host' ||
+            lowerKey === 'referer' ||
+            lowerKey === 'origin' ||
+            lowerKey === 'content-length' ||
+            lowerKey === 'transfer-encoding' ||
+            lowerKey === 'connection' ||
+            lowerKey === 'content-encoding' ||
+            lowerKey === 'accept-encoding'
+          );
+        };
+
         if (options.headers) {
           if (options.headers instanceof Headers) {
             options.headers.forEach((value, key) => {
-              headersObj[key] = value;
+              if (!isHeaderKeysToExclude(key)) {
+                headersObj[key] = value;
+              }
             });
           } else if (Array.isArray(options.headers)) {
             options.headers.forEach(([key, value]) => {
-              headersObj[key] = value;
+              if (!isHeaderKeysToExclude(key) && value !== undefined && value !== null) {
+                headersObj[key] = String(value);
+              }
             });
           } else {
             Object.entries(options.headers).forEach(([key, value]) => {
-              if (value !== undefined && value !== null) {
+              if (!isHeaderKeysToExclude(key) && value !== undefined && value !== null) {
                 headersObj[key] = String(value);
               }
             });
@@ -803,13 +821,50 @@ export const getAiClient = (settings?: AppSettings, forceDirect: boolean = false
 
   const wrapMethod = (originalMethod: Function) => {
      return async function(params: any) {
-         return originalMethod.call(googleAi.models, cleanGoogleParams(params));
+         try {
+             return await originalMethod.call(googleAi.models, cleanGoogleParams(params));
+         } catch (err: any) {
+             const errMsg = String(err.message || err).toLowerCase();
+             const hasTools = params?.config?.tools || params?.tools;
+             if (hasTools && (errMsg.includes('request body') || errMsg.includes('invalid') || errMsg.includes('tool') || errMsg.includes('400') || errMsg.includes('grounding'))) {
+                 console.warn("[Google GenAI Wrap] 🛠️ Auto-recovering from tools/grounding error. Retrying without tools config...", err);
+                 const fallbackParams = { ...params };
+                 if (fallbackParams.config) {
+                     fallbackParams.config = { ...fallbackParams.config };
+                     delete fallbackParams.config.tools;
+                 }
+                 if (fallbackParams.tools) {
+                     delete fallbackParams.tools;
+                 }
+                 return await originalMethod.call(googleAi.models, cleanGoogleParams(fallbackParams));
+             }
+             throw err;
+         }
      };
   };
 
   const wrapStreamMethod = (originalMethod: Function) => {
      return async function*(params: any, options?: any) {
-         yield* await originalMethod.call(googleAi.models, cleanGoogleParams(params), options);
+         try {
+             yield* await originalMethod.call(googleAi.models, cleanGoogleParams(params), options);
+         } catch (err: any) {
+             const errMsg = String(err.message || err).toLowerCase();
+             const hasTools = params?.config?.tools || params?.tools;
+             if (hasTools && (errMsg.includes('request body') || errMsg.includes('invalid') || errMsg.includes('tool') || errMsg.includes('400') || errMsg.includes('grounding'))) {
+                 console.warn("[Google GenAI Stream Wrap] 🛠️ Auto-recovering from tools/grounding error in stream. Retrying without tools config...", err);
+                 const fallbackParams = { ...params };
+                 if (fallbackParams.config) {
+                     fallbackParams.config = { ...fallbackParams.config };
+                     delete fallbackParams.config.tools;
+                 }
+                 if (fallbackParams.tools) {
+                     delete fallbackParams.tools;
+                 }
+                 yield* await originalMethod.call(googleAi.models, cleanGoogleParams(fallbackParams), options);
+             } else {
+                 throw err;
+             }
+         }
      };
   };
 

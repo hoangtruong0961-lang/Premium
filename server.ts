@@ -176,11 +176,32 @@ async function startServer() {
         });
       }
 
+      // Ensure Content-Type is set explicitly to application/json if sending JSON-serializable body
+      let requestData = body;
+      const lowerMethod = (method || 'POST').toLowerCase();
+      if (lowerMethod === 'post' || lowerMethod === 'put' || lowerMethod === 'patch') {
+        const hasJsonHeader = Object.keys(cleanHeaders).some(k => k.toLowerCase() === 'content-type');
+        if (!hasJsonHeader) {
+          cleanHeaders['Content-Type'] = 'application/json';
+        } else {
+          // Normalize Content-Type header casing to 'Content-Type'
+          const existingKey = Object.keys(cleanHeaders).find(k => k.toLowerCase() === 'content-type')!;
+          const existingValue = cleanHeaders[existingKey];
+          delete cleanHeaders[existingKey];
+          cleanHeaders['Content-Type'] = existingValue;
+        }
+        
+        // Force serialization to prevent Axios from turning it into urlencoded or other formats
+        if (body && typeof body === 'object') {
+          requestData = JSON.stringify(body);
+        }
+      }
+
       const response = await axios({
         url,
         method: method || 'POST',
         headers: cleanHeaders,
-        data: body,
+        data: requestData,
         responseType: isStream ? 'stream' : 'json',
         validateStatus: () => true // Don't throw on error status codes
       });
@@ -430,11 +451,11 @@ ${prompt || 'Hãy chẩn đoán toàn diện câu truyện hiển thị xem có 
 
       const systemInstruction = `Bạn là một chuyên gia về Biểu thức chính quy (JS RegExp) và gỡ lỗi kịch bản Regex (Regex Code & CSS/JS Widget Sandbox Debugger) trong môi trường nhập vai văn bản.
 Nhiệm vụ của bạn là xem xét tóm tắt và lỗi liên quan đến:
-1. Tên kịch bản Regex: \${scriptName || 'Chưa đặt tên'}
-2. Chuỗi tìm kiếm (Regex Pattern): \\\`\${findRegex || ''}\\\`
-3. Chuỗi thay thế (Replace String): \\\`\${replaceString || ''}\\\`
-4. Dữ liệu thử mẫu (Test Input): \\\`\${testInput || ''}\\\`
-5. Kết quả sau Regex (Test Output): \\\`\${testOutput || ''}\\\`
+1. Tên kịch bản Regex: ${scriptName || 'Chưa đặt tên'}
+2. Chuỗi tìm kiếm (Regex Pattern): \`${findRegex || ''}\`
+3. Chuỗi thay thế (Replace String): \`${replaceString || ''}\`
+4. Dữ liệu thử mẫu (Test Input): \`${testInput || ''}\`
+5. Kết quả sau Regex (Test Output): \`${testOutput || ''}\`
 
 Hãy phân tích xem Regex Pattern có lỗi cú pháp không, có khớp đúng với nhóm mong muốn trong cấu trúc của Test Input không, chuỗi thay thế có bị vỡ thẻ HTML/CSS không, hoặc rò rỉ mã bảo mật không.
 
@@ -455,23 +476,23 @@ Quy tắc phản hồi:
 
       const regexPromptContext = `
 [KỊCH BẢN REGEX KHẢO SÁT]
-- Tên: \${scriptName || 'Chưa đặt'}
-- Biểu thức chính quy (Tìm kiếm): \\\`\${findRegex || '(trống)'}\\\`
+- Tên: ${scriptName || 'Chưa đặt'}
+- Biểu thức chính quy (Tìm kiếm): \`${findRegex || '(trống)'}\`
 - Chuỗi Thay thế (HTML/CSS/JS): 
-\\\`\\\`\\\`html
-\${replaceString || '(trống)'}
-\\\`\\\`\\\`
+\`\`\`html
+${replaceString || '(trống)'}
+\`\`\`
 - Chuỗi Đầu Vào Kiểm Thử (Test Input): 
-\\\`\\\`\\\`text
-\${testInput || ''}
-\\\`\\\`\\\`
+\`\`\`text
+${testInput || ''}
+\`\`\`
 - Kết Quả Đầu Ra Thực Tế (Test Output): 
-\\\`\\\`\\\`text
-\${testOutput || ''}
-\\\`\\\`\\\`
+\`\`\`text
+${testOutput || ''}
+\`\`\`
 
 Yêu cầu phân tích gỡ lỗi Regex từ người chơi:
-\${prompt || 'Hãy phân tích kịch bản Regex này, chỉ ra lỗi nếu có và đề xuất giải pháp tối ưu.'}
+${prompt || 'Hãy phân tích kịch bản Regex này, chỉ ra lỗi nếu có và đề xuất giải pháp tối ưu.'}
 `;
 
       formattedHistory.push({
