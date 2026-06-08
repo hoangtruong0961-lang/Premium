@@ -1,5 +1,5 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
-import { AppSettings, SaveFile, SystemLog, ImageMetadata, StoredCharacter } from '../../types';
+import { AppSettings, SaveFile, SystemLog, ImageMetadata, StoredCharacter, ProxyConfig } from '../../types';
 import { DEFAULT_SAFETY_SETTINGS, DIFFICULTY_LEVELS, OUTPUT_LENGTHS } from '../../constants/promptTemplates';
 import { CompressionUtils } from '../../utils/compression';
 
@@ -78,6 +78,72 @@ interface RPGDatabase extends DBSchema {
 const DB_NAME = 'ark-v2-db';
 const DB_VERSION = 3;
 
+export const BUILT_IN_PROXIES: ProxyConfig[] = [
+  {
+    id: 'builtin-ggchan-1',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-JHIoRkXE1dQvIWLXNqDpKzA6Dv8pRmbWpcex9rOfx40',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-2',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-nnkQdPcTzuMH64jr6ucroEQquymoDhXM4ouqU6sFFOU',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-3',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-ISYgoJBO77zC7DrfkpDPx9XxaNPmqtilFKGto2OhejQ',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-4',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-MFqQlpqQrHi_nGOyf3F1aRlTsOeR71itsMqTSzDMkZ8',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-5',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-JHIoRkXE1dQvIWLXNqDpKzA6Dv8pRmbWpcex9rOfx40',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-6',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-nnkQdPcTzuMH64jr6ucroEQquymoDhXM4ouqU6sFFOU',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  },
+  {
+    id: 'builtin-ggchan-7',
+    url: 'https://gcli.ggchan.dev/',
+    key: 'gg-gcli-MFqQlpqQrHi_nGOyf3F1aRlTsOeR71itsMqTSzDMkZ8',
+    model: 'gemini-2.5-pro-preview',
+    models: ['gemini-2.5-pro-preview', 'gemini-2.5-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-3-flash-preview'],
+    isActive: true,
+    type: 'google'
+  }
+];
+
 export const DEFAULT_SETTINGS: AppSettings = {
     javaScriptMode: 'auto',
     soundVolume: 50,
@@ -112,16 +178,16 @@ export const DEFAULT_SETTINGS: AppSettings = {
     proxyModels2: [],
     proxyName2: '',
     useGeminiApi: true,
-    proxyEnabled: false,
+    proxyEnabled: true,
     enableVectorMemory: true,
     useLocalEmbedding: true,
     enableSearchGrounding: false,
     enableSotaSearch: false,
     enableDeepLogic: true,
     deepLogicMode: 'strict',
-    proxies: [],
-    activeProxyId: undefined,
-    useProxyPool: false,
+    proxies: BUILT_IN_PROXIES,
+    activeProxyId: 'builtin-ggchan-1',
+    useProxyPool: true,
     proxyPoolStrategy: 'round_robin',
     storyDialogueColor: '#F97316',
     storyThinkingColor: '#A855F7',
@@ -424,8 +490,27 @@ class DatabaseService {
         if (migratedProxies.length > 0) {
           mergedSettings.proxies = migratedProxies;
           mergedSettings.activeProxyId = migratedProxies[0].id;
-          setTimeout(() => this.saveSettings(mergedSettings), 0);
+        } else {
+          mergedSettings.proxies = [...BUILT_IN_PROXIES];
+          mergedSettings.activeProxyId = 'builtin-ggchan-1';
+          mergedSettings.proxyEnabled = true;
+          mergedSettings.useProxyPool = true;
+          mergedSettings.proxyPoolStrategy = 'round_robin';
         }
+        setTimeout(() => this.saveSettings(mergedSettings), 0);
+      }
+
+      // Check if existing proxies has any GGChan Built-in proxies. If not, auto inject them to prevent being left out!
+      const hasGGChan = mergedSettings.proxies && mergedSettings.proxies.some(p => p.url && p.url.includes('gcli.ggchan.dev'));
+      if (!hasGGChan) {
+        mergedSettings.proxies = [...(mergedSettings.proxies || []), ...BUILT_IN_PROXIES];
+        if (!mergedSettings.activeProxyId) {
+          mergedSettings.activeProxyId = 'builtin-ggchan-1';
+        }
+        mergedSettings.proxyEnabled = true;
+        mergedSettings.useProxyPool = true;
+        mergedSettings.proxyPoolStrategy = 'round_robin';
+        setTimeout(() => this.saveSettings(mergedSettings), 0);
       }
 
       return mergedSettings;

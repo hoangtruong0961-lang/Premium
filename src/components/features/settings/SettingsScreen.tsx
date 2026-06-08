@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NavigationProps, GameState, AppSettings, ThinkingBudgetLevel, ThinkingLevel, NarrativePerspective, CustomTheme } from '../../../types';
 import SafetySettings from './SafetySettings';
 import RegexScriptsManager from '../gameplay/components/RegexScriptsManager';
-import { dbService, DEFAULT_SETTINGS } from '../../../services/db/indexedDB';
+import { dbService, DEFAULT_SETTINGS, BUILT_IN_PROXIES } from '../../../services/db/indexedDB';
 import { elevenLabsService, ElevenLabsVoice } from '../../../services/audio/elevenlabs';
 import { browserTtsService, BrowserVoice } from '../../../services/audio/browsertts';
 import Button from '../../ui/Button';
@@ -656,6 +656,20 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate, fromGame, i
     handleMultipleChanges({
       proxies: updatedProxies,
       activeProxyId: settings.activeProxyId || newProxy.id
+    });
+  };
+
+  const handleLoadBuiltinProxies = () => {
+    if (!settings) return;
+    const nonGGChanProxies = settings.proxies.filter(p => !p.url || !p.url.includes('gcli.ggchan.dev'));
+    const updatedProxies = [...nonGGChanProxies, ...BUILT_IN_PROXIES];
+    
+    handleMultipleChanges({
+      proxies: updatedProxies,
+      activeProxyId: 'builtin-ggchan-1',
+      proxyEnabled: true,
+      useProxyPool: true,
+      proxyPoolStrategy: 'round_robin'
     });
   };
 
@@ -1735,6 +1749,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate, fromGame, i
                           <div className="flex gap-2">
                               <Button 
                                   variant="ghost"
+                                  className="text-[10px] h-8 px-3 rounded-xl border border-mystic-accent/60 shadow-[2px_2px_4px_#cbd2df,-2px_-2px_4px_#ffffff] dark:shadow-[2px_2px_4px_#030610,-2px_-2px_4px_#142042] text-mystic-accent dark:text-emerald-400 bg-[#cbd2df]/10 dark:bg-slate-950/20 disabled:opacity-40 font-extrabold"
+                                  onClick={handleLoadBuiltinProxies}
+                                  disabled={!settings.proxyEnabled}
+                              >
+                                  <Sparkles className="w-3.5 h-3.5 mr-1 text-mystic-accent" /> GGChan Pool
+                              </Button>
+                              <Button 
+                                  variant="ghost"
                                   className="text-[10px] h-8 px-3 rounded-xl border border-[#cbd2df]/30 dark:border-[#142042]/10 shadow-[2px_2px_4px_#cbd2df,-2px_-2px_4px_#ffffff] dark:shadow-[2px_2px_4px_#030610,-2px_-2px_4px_#142042] text-slate-600 dark:text-slate-400 bg-transparent disabled:opacity-40"
                                   onClick={addProxy}
                                   disabled={!settings.proxyEnabled}
@@ -1835,7 +1857,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ onNavigate, fromGame, i
                                                 {settings.activeProxyId === proxy.id ? <CheckCircle2 className="w-3.5 h-3.5" /> : null}
                                                 {settings.activeProxyId === proxy.id ? 'HOẠT ĐỘNG' : 'CHỌN DÙNG'}
                                             </button>
-                                            <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 tracking-wider">NODE {index + 1}</h4>
+                                            <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 tracking-wider flex items-center gap-2">
+                                                NODE {index + 1}
+                                                {proxy.url && proxy.url.includes('gcli.ggchan.dev') && (
+                                                    <span className="px-2 py-0.5 rounded text-[8px] font-extrabold bg-mystic-accent/20 text-mystic-accent border border-mystic-accent/30 tracking-wide uppercase">
+                                                        GGChan Built-In
+                                                    </span>
+                                                )}
+                                            </h4>
                                         </div>
                                         <div className="flex items-center gap-1 bg-[#cbd2df]/25 dark:bg-[#030610]/50 p-1.5 rounded-xl">
                                             <button onClick={() => moveProxy(index, 'up')} disabled={index === 0} className="p-1 px-1.5 text-slate-500 hover:text-mystic-accent rounded-lg disabled:opacity-30 cursor-pointer"><ChevronUp className="w-4 h-4" /></button>
